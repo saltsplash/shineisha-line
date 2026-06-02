@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>下新池 新栄車 現在地</title>
+<style>
+  body{
+    margin:0; min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:#1a1a2e; color:#fff; text-align:center; padding:24px;
+  }
+  .lantern{font-size:64px; margin-bottom:16px;}
+  h1{font-size:22px; margin:0 0 8px;}
+  p{font-size:16px; line-height:1.7; color:#ddd; margin:4px 0;}
+  a.btn{
+    display:inline-block; margin-top:20px; padding:14px 28px;
+    background:#e8541e; color:#fff; text-decoration:none;
+    border-radius:8px; font-size:18px; font-weight:bold;
+  }
+  .off{color:#aaa;}
+</style>
+</head>
+<body>
+
+<!-- ============================================================== -->
+<!--  ★ 毎朝ここだけ書き換える ★                                   -->
+<!--  その日のGoogleマップ共有リンクを、下の "" の中に貼り替える。  -->
+<!--  配信していない時（祭り前・夜間・終了後）は "" のまま空にする。 -->
+<!-- ============================================================== -->
+<script>
+  var SHARE_URL = "";
+</script>
+<!-- ============================================================== -->
+
+<div class="lantern">🏮</div>
+
+<script>
+  if (SHARE_URL && SHARE_URL.indexOf("http") === 0) {
+    // リンクがあれば即座にGoogleマップへ転送
+    document.write(
+      '<h1>新栄車の現在地へ移動します</h1>' +
+      '<p>自動で地図が開きます。開かない場合は下のボタンを押してください。</p>' +
+      '<a class="btn" href="' + SHARE_URL + '">地図を開く</a>'
+    );
+    location.replace(SHARE_URL);
+  } else {
+    // リンクが空＝配信していない時の表示
+    document.write(
+      '<h1>下新池 新栄車</h1>' +
+      '<p class="off">ただいま位置情報は配信していません。</p>' +
+      '<p class="off">お祭り当日の運行時間中にご覧ください。</p>'
+    );
+  }
+</script>
+
+</body>
+</html>
