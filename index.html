@@ -24,35 +24,41 @@
 </head>
 <body>
 
-<!-- ============================================================== -->
-<!--  ★ 毎朝ここだけ書き換える ★                                   -->
-<!--  その日のGoogleマップ共有リンクを、下の "" の中に貼り替える。  -->
-<!--  配信していない時（祭り前・夜間・終了後）は "" のまま空にする。 -->
-<!-- ============================================================== -->
-<script>
-  var SHARE_URL = "";
-</script>
-<!-- ============================================================== -->
+<!-- ================================================================ -->
+<!--  その日の共有リンクは share-url.txt に書く（このHTMLは触らない）  -->
+<!--  share-url.txt の全文 = Googleマップ共有リンク1行。               -->
+<!--  配信していない時（祭り前・夜間・終了後）は空にする。             -->
+<!--  毎朝の差し替えはiPhoneのショートカットから自動で行う。           -->
+<!-- ================================================================ -->
 
 <div class="lantern">🏮</div>
+<div id="msg">
+  <h1>下新池 新栄車</h1>
+  <p class="off">読み込み中…</p>
+</div>
 
 <script>
-  if (SHARE_URL && SHARE_URL.indexOf("http") === 0) {
-    // リンクがあれば即座にGoogleマップへ転送
-    document.write(
-      '<h1>新栄車の現在地へ移動します</h1>' +
-      '<p>自動で地図が開きます。開かない場合は下のボタンを押してください。</p>' +
-      '<a class="btn" href="' + SHARE_URL + '">地図を開く</a>'
-    );
-    location.replace(SHARE_URL);
-  } else {
-    // リンクが空＝配信していない時の表示
-    document.write(
+  function showOff() {
+    document.getElementById("msg").innerHTML =
       '<h1>下新池 新栄車</h1>' +
       '<p class="off">ただいま位置情報は配信していません。</p>' +
-      '<p class="off">お祭り当日の運行時間中にご覧ください。</p>'
-    );
+      '<p class="off">お祭り当日の運行時間中にご覧ください。</p>';
   }
+  fetch("share-url.txt?ts=" + Date.now(), { cache: "no-store" })
+    .then(function (res) { return res.ok ? res.text() : ""; })
+    .then(function (text) {
+      var url = (text || "").trim();
+      if (url.indexOf("https://") === 0) {
+        document.getElementById("msg").innerHTML =
+          '<h1>新栄車の現在地へ移動します</h1>' +
+          '<p>自動で地図が開きます。開かない場合は下のボタンを押してください。</p>' +
+          '<a class="btn" href="' + url + '">地図を開く</a>';
+        location.replace(url);
+      } else {
+        showOff();
+      }
+    })
+    .catch(showOff);
 </script>
 
 </body>
