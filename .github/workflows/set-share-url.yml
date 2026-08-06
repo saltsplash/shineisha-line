@@ -20,7 +20,19 @@ jobs:
         run: |
           case "$REQ" in
             https://maps.app.goo.gl/*|https://www.google.com/maps*)
-              printf '%s' "$REQ" > share-url.txt
+              # 短縮リンクはこの場で展開する（ロボットのpushでは expand-share-url が起動しないため内蔵）
+              FINAL="$REQ"
+              case "$REQ" in
+                https://maps.app.goo.gl/*)
+                  LONG=$(curl -s -o /dev/null -w '%{url_effective}' -L --max-redirs 5 \
+                    -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" \
+                    "$REQ")
+                  case "$LONG" in
+                    https://www.google.com/maps*) FINAL="$LONG" ;;
+                  esac
+                  ;;
+              esac
+              printf '%s' "$FINAL" > share-url.txt
               MSG="配信開始（ショートカット）"
               ;;
             配信終了|stop)
