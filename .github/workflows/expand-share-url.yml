@@ -1,0 +1,45 @@
+name: expand-share-url
+# share-url.txt に短縮リンク（maps.app.goo.gl）が書き込まれたら、
+# 自動で本来の長いURL（google.com/maps）に展開して書き直すロボット。
+# 目的: スマホで英語の中継画面（preview.app.goo.gl）を経由させないため。
+# 2回目の実行は展開済みURLに一致しないため何もせず終了する（無限ループしない）。
+
+on:
+  push:
+    paths:
+      - share-url.txt
+
+permissions:
+  contents: write
+
+jobs:
+  expand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Expand short link if present
+        run: |
+          URL=$(tr -d '[:space:]' < share-url.txt)
+          case "$URL" in
+            https://maps.app.goo.gl/*)
+              LONG=$(curl -s -o /dev/null -w '%{url_effective}' -L --max-redirs 5 \
+                -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" \
+                "$URL")
+              case "$LONG" in
+                https://www.google.com/maps*)
+                  printf '%s' "$LONG" > share-url.txt
+                  git config user.name "expand-bot"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git add share-url.txt
+                  git commit -m "短縮リンクを自動展開（英語中継画面の回避）" || exit 0
+                  git push
+                  ;;
+                *)
+                  echo "展開結果が google.com/maps でないため書き換えません: $LONG"
+                  ;;
+              esac
+              ;;
+            *)
+              echo "短縮リンクではないため何もしません"
+              ;;
+          esac
