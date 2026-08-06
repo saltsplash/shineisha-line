@@ -1,0 +1,39 @@
+name: set-share-url
+# iPhoneショートカットからの合図（repository_dispatch）を受けて share-url.txt を書き換えるロボット。
+# 合図の event_type にリンクが入っていれば配信開始、「配信終了」なら空戻し。
+# それ以外の内容は無視する（安全弁）。短縮リンクは後段の expand-share-url が自動展開する。
+
+on:
+  repository_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  set:
+    runs-on: ubuntu-latest
+    env:
+      REQ: ${{ github.event.action }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update share-url.txt
+        run: |
+          case "$REQ" in
+            https://maps.app.goo.gl/*|https://www.google.com/maps*)
+              printf '%s' "$REQ" > share-url.txt
+              MSG="配信開始（ショートカット）"
+              ;;
+            配信終了|stop)
+              : > share-url.txt
+              MSG="配信終了（ショートカット）"
+              ;;
+            *)
+              echo "対象外の内容のため何もしません"
+              exit 0
+              ;;
+          esac
+          git config user.name "set-url-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add share-url.txt
+          git commit -m "$MSG" || exit 0
+          git push
