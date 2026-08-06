@@ -50,10 +50,20 @@
       var url = (text || "").trim();
       if (url.indexOf("https://") === 0) {
         document.getElementById("msg").innerHTML =
-          '<h1>新栄車の現在地へ移動します</h1>' +
-          '<p>自動で地図が開きます。開かない場合は下のボタンを押してください。</p>' +
-          '<a class="btn" href="' + url + '">地図を開く</a>';
-        location.replace(url);
+          '<h1>新栄車の現在地マップを開きます</h1>' +
+          '<p>開いた地図に「現在地を共有」というボタンが出ますが、<strong>押す必要はありません</strong>。<br>そのまま新栄車の場所をご覧いただけます。</p>' +
+          '<a class="btn" href="' + url + '">地図を開く</a>' +
+          '<p class="off" id="count">5秒後に自動で開きます</p>';
+        var n = 5;
+        var t = setInterval(function () {
+          n--;
+          if (n <= 0) {
+            clearInterval(t);
+            location.replace(url);
+          } else {
+            document.getElementById("count").textContent = n + "秒後に自動で開きます";
+          }
+        }, 1000);
       } else {
         showOff();
       }
